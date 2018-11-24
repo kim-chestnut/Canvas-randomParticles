@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>随机粒子效果</title>
+    <style>
+        canvas{
+            border:1px solid red;
+            margin-top:50px;
+            margin-left:200px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas" width="1000" height="500"></canvas>
+    <script>
+
+        
+        class Canvas {
+            constructor(ele){
+                this.canvas = canvas;       //获取canvas对象
+                this.render();
+                this.circular();
+                this.animate();
+            }
+            render(){
+                this.canvasW = this.canvas.width    //获取canvas的宽度
+                this.canvasH = this.canvas.height   //获取canvas的高度
+                this.ctx = this.canvas.getContext("2d");        //获取context上下文
+                this.x = this.canvasW / 2;       //小球初始点X轴位置
+                this.y = this.canvasH / 2;        //小球初始点Y轴位置
+                this.num = [];       //绘制小球的数量
+                this.timer = null;                  //生产小球定时器
+                this.maxNum = 30;
+            }
+            circular(){
+                this.timer = setInterval( () => {           
+                    let circ = this.createCircular();     //生成小球对象
+                    this.num.push(circ);                       //把小球对象添加到数量数组中
+                    this.Dram();                                   //初始绘制
+                    if(this.num.length >= this.maxNum){     //当小球数量达到最大的时候，停止生产小球
+                        clearInterval(this.timer);
+                    }  
+                },500)    
+            }
+            animate(){                                  //运行小球的圆心位置
+                setInterval( () => {
+                    for(let cir of this.num){                   //遍历所有小球对象并改变小球位置
+                        cir.x = cir.x + cir.disX * cir.speedX;              
+                        cir.y = cir.y + cir.disY * cir.speedY;
+                        if(cir.x - cir.r < 0 || cir.x + cir.r > this.canvasW){          //判断是否撞墙
+                            cir.disX = -cir.disX;
+                        }
+                        if(cir.y - cir.r < 0 || cir.y + cir.r > this.canvasH){
+                            cir.disY = -cir.disY;
+                        }
+                    }
+                    this.Dram();                //每次更改位置，重新绘制
+                },16.7);
+            }
+            Dram(){
+                this.clearCanvas();             
+                for(let cir of this.num){           //绘制所有小球
+                    this.ctx.beginPath();
+                    this.ctx.fillStyle = cir.color;
+                    this.ctx.arc(cir.x,cir.y,cir.r,0,2*Math.PI);
+                    this.ctx.fill();
+                    this.ctx.closePath();
+                }           
+            }
+            createCircular(){           //创建小球，并确定小球配置
+                return {
+                    color : `rgba(${this.randColor()},${this.randColor()},${this.randColor()},${this.randAlpha()})`,
+                    x : this.x,
+                    y : this.y,
+                    r : this.randRadius(),
+                    disX : this.direction(),
+                    disY : this.direction(),
+                    speedX : this.randSpeed(),
+                    speedY : this.randSpeed(),
+                }
+            }
+            randColor(){            //随机颜色
+                return Math.floor(Math.random() * 256);
+            }
+            randAlpha(){            //随机透明度
+                return (Math.random()).toFixed(2); 
+            }
+            randRadius(){           //随机半径
+                return Math.floor((Math.random() * 10) + 10);
+            }
+            direction(){                //随机方向
+                return ((Math.random() * 2) - 1) > 0 ? 1 : -1;
+            }
+            randSpeed(){        //随机速度
+                return Math.floor((Math.random() * 4) + 1);
+            }
+            clearCanvas(){          //清空画布
+                this.ctx.clearRect(0,0,this.canvasW,this.canvasH);
+            }
+        }
+        const canvas = document.getElementById("canvas");
+        const can = new Canvas(canvas);
+    
+    </script>
+</body>
+</html>
